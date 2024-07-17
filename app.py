@@ -92,7 +92,7 @@ def login():
 @app.route('/personal', methods=['GET'])
 def personal():
     user_id = request.args.get('userId')
-    recommendations = get_user_recommendations(254,k=3)
+    recommendations = get_user_recommendations(2276,k=3)
     
     # Check if recommendations is a Response object
     if isinstance(recommendations, Response):
@@ -126,6 +126,7 @@ def get_similar_users(user_id, k=3):
 
 def get_user_recommendations(user_id, k=3):
     # Get similar users
+
     similar_users_df = get_similar_users(user_id, k)
     if similar_users_df is None:
         return jsonify({"error": f"No similar users found for user ID {user_id}"})
@@ -140,7 +141,7 @@ def get_user_recommendations(user_id, k=3):
 
     # Aggregate the ratings of the recommended items
     recommendations = recommendations.groupby('title')['rating'].mean().sort_values(ascending=False).reset_index()
-    print(f"Final recommendations: {recommendations}")
+    
     return recommendations
 
 
