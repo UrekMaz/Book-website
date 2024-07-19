@@ -1,0 +1,118 @@
+const express = require('express');
+const cors = require('cors');
+const mongoose = require("mongoose");
+const User = require("./UserSchema.js");
+const NewBook = require("./NewBook.js");
+const app = express();
+const bcrypt =  require("bcryptjs"); 
+const multer = require('multer');
+const jwt = require('jsonwebtoken');
+
+
+
+app.use(cors({
+    credentials:true,
+    origin:'http://localhost:5173',
+}
+))
+app.use(express.json());
+
+
+mongoose.connect('mongodb+srv://manual:nrtGC7D6tG2GjS1E@cluster0.60idrdx.mongodb.net/newTest?retryWrites=true&w=majority&appName=Cluster0'
+).then(() => {
+    console.log('Connected to MongoDB');
+})
+.catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+});
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './files'); // Ensure this directory exists
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now();
+      cb(null, uniqueSuffix + '-' + file.originalname);
+    },
+  });
+  
+  const upload = multer({ storage: storage });
+
+
+const bsalt = bcrypt.genSaltSync(10);
+
+app.post('/uploadBook',upload.single('material'),async (req,res)=>{
+    res.setHeader("Access-Control-Allow-Credentials",true);
+    const {title,isbn,rating} = req.body;
+    const material = req.file.filename;
+    try{
+        const newBook = await NewBook.create({
+            title,isbn,rating,material
+        })
+    
+        res.json(newBook);
+    }
+    catch(er){
+        console.log(er)
+        res.status(422).json(er);
+    }
+
+    
+})
+
+app.post('/register',async (req,res)=>{
+    
+    res.setHeader("Access-Control-Allow-Credentials",true);
+    const {name,email,pwd} = req.body;
+    try{
+        const user = await User.create({
+            name,email,pwd : bcrypt.hashSync(pwd,bsalt),
+        })
+    
+        res.json(user);
+    }
+    catch(er){
+        res.status(422).json(er);
+    }
+
+    
+})
+const secretKey = "asdfgWEJyuVBTYUIjh";
+app.post('/login',async (req,res)=>{
+    
+    res.setHeader("Access-Control-Allow-Credentials",true);
+    const {email,pwd} = req.body;
+    try{
+        const user = await User.findOne({email})
+    
+        if(user){
+            const passOK = bcrypt.compareSync(pwd,user.pwd);
+            if(passOK){
+                jwt.sign({ id: user._id, email: user.email }, secretKey, {},(err,token)=>{
+                    if (err) throw err;
+                    res.cookie('token',token,{secure:false,sameSite:'none'}).json("pass Ok");
+
+                });
+            }else{
+                res.json("Invalid credentials")
+            }
+        }
+        else{
+            res.json("User Not found");
+        }
+        
+    }
+    catch(er){
+        res.status(422).json(er);
+    }
+
+    
+})
+
+app.get('/test',(req,res)=>{
+    res.json("test ok");
+});
+
+app.listen(4000, () => {
+    console.log('Server is running on port 4000');
+});
