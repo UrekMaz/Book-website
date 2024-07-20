@@ -1,4 +1,6 @@
 from flask import Flask,render_template,request,jsonify,Response
+import requests
+
 import pickle
 import os
 import pandas as pd
@@ -6,7 +8,7 @@ from sklearn.neighbors import KNeighborsClassifier
 # Replace with your actual file paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 book_pivot_path = os.path.join(BASE_DIR, 'book_pivot.pkl')
-books_df_path = os.path.join(BASE_DIR, 'books.pkl')
+books_df_path = os.path.join(BASE_DIR, 'books_2.pkl')
 book_sparse_path = os.path.join(BASE_DIR, 'book_sparse.pkl')
 final_rating_path = os.path.join(BASE_DIR, 'final_rating.pkl')
 user_sparse_path = os.path.join(BASE_DIR, 'user_sparse.pkl')
@@ -66,15 +68,28 @@ def recommend():
     similar_books_distances = distances.flatten()[1:]
 
     # Get the titles of the similar books
-    similar_books_titles = book_pivot.index[similar_books_indices]
+    similar_books_titles = book_pivot.index[similar_books_indices].str.strip('"')
 
     # Fetch the book details for the similar books
     similar_books_df = books[books['title'].isin(similar_books_titles)].copy()
     similar_books_df['Similarity'] = similar_books_df['title'].apply(
-        lambda x: 1 - similar_books_distances[similar_books_titles.get_loc(x)]
+    
+    lambda x: 1 - similar_books_distances[similar_books_titles.get_loc(x)]
     )
-
+    similar_books_df['pdf_link'] = similar_books_df['ISBN'].apply(get_open_library_pdf_link)
     return similar_books_df.to_json(orient='records')
+
+def get_open_library_pdf_link(isbn):
+    url = f'https://openlibrary.org/isbn/{isbn}.json'
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        if 'works' in data and len(data['works']) > 0:
+            work_key = data['works'][0]['key']
+            pdf_link = f'https://openlibrary.org{work_key}?edition=key%3A/books/OL39803336M'
+            return pdf_link
+    return None
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
