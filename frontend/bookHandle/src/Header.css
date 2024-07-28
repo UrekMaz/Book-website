@@ -1,0 +1,5 @@
+.fixed-size-img {
+    width: 100%;
+    height: 250px; /* Adjust the height as needed */
+    object-fit: cover; /* Ensures the image covers the entire area */
+}
