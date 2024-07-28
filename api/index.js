@@ -8,8 +8,7 @@ const cookieparser = require('cookie-parser');
 const bcrypt =  require("bcryptjs"); 
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
-
-app.use(express.json());
+const axios = require('axios');app.use(express.json());
 app.use(cookieparser());
 app.use(cors({
     credentials:true,
@@ -35,61 +34,50 @@ const storage = multer.diskStorage({
       const uniqueSuffix = Date.now();
       cb(null, uniqueSuffix + '-' + file.originalname);
     },
-  });
-  
-  const upload = multer({ storage: storage });
+});
 
+const upload = multer({ storage: storage });
 
 const bsalt = bcrypt.genSaltSync(10);
 
-app.post('/uploadBook',upload.single('material'),async (req,res)=>{
-    res.setHeader("Access-Control-Allow-Credentials",true);
-    const {title,isbn,rating} = req.body;
+app.post('/uploadBook', upload.single('material'), async (req, res) => {
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    const { title, isbn, rating } = req.body;
     const material = req.file.filename;
-    try{
+    try {
         const newBook = await NewBook.create({
-            title,isbn,rating,material
-        })
-    
+            title, isbn, rating, material
+        });
         res.json(newBook);
-    }
-    catch(er){
-        console.log(er)
+    } catch (er) {
+        console.log(er);
         res.status(422).json(er);
     }
+});
 
-    
-})
-
-app.post('/register',async (req,res)=>{
-    
-    res.setHeader("Access-Control-Allow-Credentials",true);
-    const {name,email,pwd} = req.body;
-    try{
+app.post('/register', async (req, res) => {
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    const { name, email, pwd } = req.body;
+    try {
         const user = await User.create({
-            name,email,pwd : bcrypt.hashSync(pwd,bsalt),
-        })
-    
+            name, email, pwd: bcrypt.hashSync(pwd, bsalt),
+        });
         res.json(user);
-    }
-    catch(er){
+    } catch (er) {
         res.status(422).json(er);
     }
+});
 
-    
-})
 const secretKey = "asdfgWEJyuVBTYUIjh";
-app.post('/login',async (req,res)=>{
-    
-    res.setHeader("Access-Control-Allow-Credentials",true);
-    const {email,pwd} = req.body;
-    try{
-        const user = await User.findOne({email})
-    
-        if(user){
-            const passOK = bcrypt.compareSync(pwd,user.pwd);
-            if(passOK){
-                jwt.sign({ id: user._id, email: user.email }, secretKey, {},(err,token)=>{
+app.post('/login', async (req, res) => {
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    const { email, pwd } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (user) {
+            const passOK = bcrypt.compareSync(pwd, user.pwd);
+            if (passOK) {
+                jwt.sign({ id: user._id, email: user.email }, secretKey, {}, (err, token) => {
                     if (err) throw err;
                     res.cookie('token',token,{httpOnly: true,
                         secure: false, // set to true if using HTTPS
@@ -97,16 +85,13 @@ app.post('/login',async (req,res)=>{
                         maxAge: 24 * 60 * 60 * 1000}).json(user);
 
                 });
-            }else{
-                res.json("Invalid credentials")
+            } else {
+                res.json("Invalid credentials");
             }
-        }
-        else{
+        } else {
             res.json("User Not found");
         }
-        
-    }
-    catch(er){
+    } catch (er) {
         res.status(422).json(er);
     }
 
@@ -132,6 +117,21 @@ app.get('/profile', (req, res) => {
 
 app.get('/test',(req,res)=>{
     res.json("test ok");
+});
+
+// Add book recommendation endpoint
+app.get('/recommend_books', async (req, res) => {
+    const user_input = req.query.user;
+
+    try {
+        const response = await axios.get('http://localhost:5000/recommend_books', {
+            params: { user: user_input }
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        res.status(500).json({ error: 'Error fetching recommendations' });
+    }
 });
 
 app.listen(4000, () => {
