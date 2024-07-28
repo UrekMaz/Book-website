@@ -1,29 +1,36 @@
 import { Link, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from"axios";
+import { UserContext } from "../UserContext";
 
 export default function LoginPage(){
     const [email,setemail]= useState('');
     const [pwd,setpwd]= useState('');
     const [redirect,setRedirect] = useState(false);
+    const {setUser} = useContext(UserContext);
 
     async function handleLogin(ev){
         ev.preventDefault();
         try{
-            const response = await axios.post('/login', { email, pwd },{withCredentials: true});
-        if (response.data === "pass Ok") {
+            const {data} = await axios.post('/login', { email, pwd });
+            setUser(data);
+            console.log(data)
+            
+        if (data.email ===email) {
             alert("login successful");
             setRedirect(true);
             // Token is stored in a cookie, no need to store it in localStorage
-        } else if (response.data === "pass not ok") {
-            alert("login unsuccessful");
-        } else if (response.data === "Not found") {
-            alert("user not found");
-        }
+        } 
+        // else if (response.data === "pass not ok") {
+        //     alert("login unsuccessful");
+        // } else if (response.data === "Not found") {
+        //     alert("user not found");
+        // }
             
 
             
         }catch(er){
+            console.log(er);
             alert("login Unsuccessful")
         }
         
