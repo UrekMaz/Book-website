@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import axios from"axios";
 
 export default function Register(){
@@ -7,15 +7,21 @@ export default function Register(){
     const [name,setname]= useState('');
     const [email,setemail]= useState('');
     const [pwd,setpwd]= useState('');
+    const [redirect ,setRedirect] = useState(false);
     async function resgisterFunc(ev){
         ev.preventDefault();
         try{
             await axios.post('/register',{name,email,pwd},{withCredentials: true});
             alert("Registeration successful");
+            setRedirect(true);
         }catch(er){
             alert("Registeration Unsuccessful")
         }
         
+    }
+
+    if(redirect){
+        return <Navigate to={'/login'}></Navigate> 
     }
     return(
         
