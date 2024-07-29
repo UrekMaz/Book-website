@@ -1,10 +1,13 @@
 from flask import Flask,render_template,request,jsonify,Response
 import requests
-
+import numpy as np
 import pickle
 import os
 import pandas as pd
+from fuzzywuzzy import process
 from sklearn.neighbors import KNeighborsClassifier 
+from spellchecker import SpellChecker
+
 # Replace with your actual file paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 book_pivot_path = os.path.join(BASE_DIR, 'book_pivot.pkl')
@@ -44,40 +47,26 @@ def load_knn_model_user():
 knn_model = load_knn_model()
 knn =load_knn_model_user()
 app=Flask(__name__)
+spell = SpellChecker()
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/recommend_books', methods=['GET'])
-def recommend():
-    user_input = request.args.get('user')
-    user_input_quoted = f'"{user_input}"'
-    
-    # Check if the book is in the index
-    if user_input_quoted not in book_pivot.index:
-        return jsonify({"error": "Book not found"}), 404
-    
-    book_index = book_pivot.index.get_loc(user_input_quoted)
+def normalize_text(text):
+    return text.strip().lower()
 
-    # Find k-nearest neighbors
-    distances, indices = knn_model.kneighbors(book_sparse[book_index], n_neighbors=6)  # k+1 because the first neighbor is the book itself
+def correct_spelling(text):
+    words = text.split()
+    corrected_words = [spell.candidates(word) for word in words]
+    corrected_text = ' '.join([max(candidates, key=spell.candidates) for candidates in corrected_words])
+    return corrected_text
 
-    # Get the indices of the similar books
-    similar_books_indices = indices.flatten()[1:]  # Exclude the book itself
-    similar_books_distances = distances.flatten()[1:]
-
-    # Get the titles of the similar books
-    similar_books_titles = book_pivot.index[similar_books_indices].str.strip('"')
-
-    # Fetch the book details for the similar books
-    similar_books_df = books[books['title'].isin(similar_books_titles)].copy()
-    similar_books_df['Similarity'] = similar_books_df['title'].apply(
-    
-    lambda x: 1 - similar_books_distances[similar_books_titles.get_loc(x)]
-    )
-    similar_books_df['pdf_link'] = similar_books_df['ISBN'].apply(get_open_library_pdf_link)
-    return similar_books_df.to_json(orient='records')
+def find_similar_books(query, book_list):
+    normalized_query = normalize_text(query)
+    matches = process.extract(normalized_query, book_list, limit=5)
+    return [match[0] for match in matches if match[1] > 80]  # Adjust threshold as needed
 
 def get_open_library_pdf_link(isbn):
     url = f'https://openlibrary.org/isbn/{isbn}.json'
@@ -89,6 +78,60 @@ def get_open_library_pdf_link(isbn):
             pdf_link = f'https://openlibrary.org{work_key}?edition=key%3A/books/OL39803336M'
             return pdf_link
     return None
+
+@app.route('/recommend_books', methods=['GET'])
+def recommend():
+    user_input = request.args.get('user')
+    
+    # Normalize and correct spelling
+    user_input_normalized = normalize_text(user_input)
+    user_input_corrected = correct_spelling(user_input_normalized)
+    
+    # Find similar books based on corrected user input
+    similar_books = find_similar_books(user_input_corrected, book_pivot.index)
+    
+    if not similar_books:
+        return jsonify({"error": "No similar books found"}), 404
+    
+    # Check if the book is in the index
+    book_index = [book_pivot.index.get_loc(book) for book in similar_books if book in book_pivot.index]
+    
+    if not book_index:
+        # If no matching book index is found, return the similar books directly
+        similar_books_df = books[books['title'].isin(similar_books)].copy()
+        similar_books_df['Similarity'] = 1.0  # Set maximum similarity for direct matches
+        similar_books_df['pdf_link'] = similar_books_df['ISBN'].apply(get_open_library_pdf_link)
+        return similar_books_df.to_json(orient='records')
+
+    # Find k-nearest neighbors
+    distances, indices = knn_model.kneighbors(book_sparse[book_index], n_neighbors=6)  # k+1 because the first neighbor is the book itself
+
+    # Ensure indices are within bounds
+    valid_indices = [idx for idx in indices.flatten()[1:] if idx < book_sparse.shape[0]]
+    valid_distances = [dist for i, dist in enumerate(distances.flatten()[1:]) if indices.flatten()[i+1] < book_sparse.shape[0]]
+
+    # Get the titles of the valid similar books
+    similar_books_titles = book_pivot.index[valid_indices].str.strip('"')
+
+    # Fetch the book details for the similar books
+    similar_books_df = books[books['title'].isin(similar_books_titles)].copy()
+    
+    # Ensure valid distances are correctly aligned with the similar book titles
+    def get_similarity(title):
+        try:
+            idx = similar_books_titles.get_loc(title)
+            if isinstance(idx, (int, np.integer)):
+                return 1 - valid_distances[idx]
+            else:
+                return 0  # Default similarity if title is not found
+        except KeyError:
+            return 0  # Default similarity if title is not found
+    
+    similar_books_df['Similarity'] = similar_books_df['title'].apply(get_similarity)
+    similar_books_df['pdf_link'] = similar_books_df['ISBN'].apply(get_open_library_pdf_link)
+
+    return similar_books_df.to_json(orient='records')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -158,6 +201,8 @@ def get_user_recommendations(user_id, k=3):
     recommendations = recommendations.groupby('title')['rating'].mean().sort_values(ascending=False).reset_index()
     
     return recommendations
+
+
 
 
 if __name__ == '__main__':
