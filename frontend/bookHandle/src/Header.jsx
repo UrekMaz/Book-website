@@ -63,6 +63,13 @@ export default function Header() {
                         </svg>
                     </div>
                 </Link>
+
+                <Link to={'/chatbot'} className='flex gap-2 items-center border border-gray-300 rounded-full px-4 py-2 shadow-md'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.75v.008M4.5 8.25c0-1.89 1.269-3.5 3-3.937M19.5 8.25a3.948 3.948 0 0 0-3-3.937M4.5 8.25V10a7.5 7.5 0 0 0 3 5.99m-3-7.74a5.25 5.25 0 0 1 10.5 0v4.745a5.25 5.25 0 0 1-10.5 0V8.25ZM12 21.75a7.5 7.5 0 0 0 7.5-7.5v-2.25m-15 0v2.25a7.5 7.5 0 0 0 15 0V10a7.5 7.5 0 0 0-7.5 7.5H4.5m7.5-9V7.5m3-1.875h.008V3.75H12m0 0H11.992V3.75H12m0 0v-.008M9 3.75v.008M12 3.75h-.008V3.75H12m0 0V2.25h.008V3.75H12Zm0 0h-.008V3.75H12ZM4.5 8.25V10a7.5 7.5 0 0 0 3 5.99m-3-7.74a5.25 5.25 0 0 1 10.5 0v4.745a5.25 5.25 0 0 1-10.5 0V8.25ZM12 21.75a7.5 7.5 0 0 0 7.5-7.5v-2.25m-15 0v2.25a7.5 7.5 0 0 0 15 0V10a7.5 7.5 0 0 0-7.5 7.5H4.5m7.5-9V7.5m3-1.875h.008V3.75H12m0 0H11.992V3.75H12m0 0v-.008M9 3.75v.008M12 3.75h-.008V3.75H12m0 0V2.25h.008V3.75H12Zm0 0h-.008V3.75H12ZM9 3.75v.008" />
+                    </svg>
+                    <span>Chatbot</span>
+                </Link>
             </header>
 
             <div className="container mt-4">
@@ -71,7 +78,6 @@ export default function Header() {
                         <h2 className="text-2xl font-bold mb-4"></h2>
                         <div className="row">
                             {recommendedBooks.map((book, index) => {
-                                // Remove any additional quotes from the URL
                                 const imageUrl = book.image_1.replace(/["]+/g, '');
                                 return (
                                     <div key={index} className="col-md-4 mb-4">
@@ -90,7 +96,7 @@ export default function Header() {
                                                             <button type="button" className="btn btn-sm btn-outline-secondary">View</button>
                                                         </a>
                                                     </div>
-                                                    <small className="text-body-secondary">Similarity: {book.Similarity.toFixed(2)}</small>
+                                                    <small className="text-body-secondary">Similarity:</small>
                                                 </div>
                                             </div>
                                         </div>
