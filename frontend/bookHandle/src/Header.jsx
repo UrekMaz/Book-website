@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './Header.css'; // Make sure to import your CSS file
-import Logout from './Logout.jsx'; // Import the Logout component
+import './Header.css';  // Ensure you have styles for grid and card here
+import Logout from './Logout';
 
 export default function Header() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -13,7 +13,7 @@ export default function Header() {
         e.preventDefault();
         try {
             const response = await axios.get('http://localhost:4000/recommend_books', {
-                params: { user: searchTerm }
+                params: { query: searchTerm }
             });
             setRecommendedBooks(response.data);
         } catch (error) {
@@ -72,22 +72,35 @@ export default function Header() {
                         </svg>
                         <span>Chatbot</span>
                     </Link>
-                    <div className="flex gap-4">
-  
-                      <Logout />
-                     </div>
 
+                    <Logout /> {/* Added Logout component */}
                 </div>
             </header>
-
             {recommendedBooks.length > 0 && (
-                <div className='recommendations'>
+                <div className='container mt-4'>
                     <h2>Recommended Books:</h2>
-                    <ul>
+                    <div className='row'>
                         {recommendedBooks.map((book, index) => (
-                            <li key={index}>{book}</li>
+                            <div key={index} className='col-md-3 mb-4'>
+                                <div className='card'>
+                                    {book.image_url && (
+                                        <img src={book.image_url} alt={book.title} className='card-img-top' />
+                                    )}
+                                    <div className='card-body'>
+                                        <h5 className='card-title'>{book.title}</h5>
+                                        <p className='card-text'>
+                                            <strong>Author:</strong> {book.authors}<br />
+                                            <strong>Rating:</strong> {book.average_rating}<br />
+                                            <strong>Category:</strong> {book.categories || 'Not available'}
+                                        </p>
+                                        {book.previewLink && (
+                                            <a href={book.previewLink} className='btn btn-primary' target='_blank' rel='noopener noreferrer'>Preview</a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
             )}
         </div>
