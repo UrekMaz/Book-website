@@ -183,12 +183,14 @@ app.post("/trends",async (req, res) =>{
     });
 });
 app.get('/recommend_books', async (req, res) => {
-    const user_input = req.query.user;
+    const user_input = req.query.query;
+    console.log(`User input received: ${user_input}`);  // Print user input
 
     try {
         const response = await axios.get('http://localhost:5000/recommend_books', {
-            params: { user: user_input }
+            params: { query: user_input }
         });
+        console.log('Received recommendations:', response.data);  // Print recommendations received from Flask
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching recommendations:', error);
