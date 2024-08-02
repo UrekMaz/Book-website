@@ -10,15 +10,14 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 import os
 from PyPDF2 import PdfReader
 from langchain.agents import tool
-from langchain_community.embeddings import FastEmbedEmbeddings
-
+from langchain_community.embeddings.spacy_embeddings import SpacyEmbeddings
 load_dotenv()
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 groq_api_key = os.getenv('GROQ_API_KEY')
 
 
-embeddings = NomicEmbeddings(model="nomic-embed-text-v1.5")
+embeddings = SpacyEmbeddings(model_name="en_core_web_sm")
 
 # Define the tool function
 def extract_text_function(query: str) -> str:
