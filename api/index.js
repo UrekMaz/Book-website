@@ -9,6 +9,8 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const session = require('express-session');
+const {list} = require('./genre.js')
+const {Alist} =require('./authors.js')
 
 const app = express();
 
@@ -62,6 +64,28 @@ app.post('/uploadBook', upload.single('material'), async (req, res) => {
         res.status(422).json(er);
     }
 });
+
+app.get('/genres', async (req, res) => {
+    console.log("entered");
+    try {
+      const categories = await list();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to read the file' });
+    }
+  });
+
+  app.get('/authors', async (req, res) => {
+    console.log("entered authors");
+    try {
+      const categories = await Alist();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to read the file' });
+    }
+  });
+
+  
 
 app.post('/register', async (req, res) => {
     res.setHeader("Access-Control-Allow-Credentials", true);
@@ -129,6 +153,35 @@ app.get('/test', (req, res) => {
     res.json("test ok");
 });
 
+app.post("/trends",async (req, res) =>{
+
+    const { genre, authors } = req.body;
+
+    console.log('Received genre:', genre);
+    console.log('Received authors:', authors);
+
+    // Perform operations with genre and authors
+    // For example, save to database or process the data
+    try {
+        const response = await axios.get('http://localhost:5001/trends', {
+            params: { genres: genre, authors: authors }
+             }
+        );
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        res.status(500).json({ error: 'Error fetching recommendations' });
+    }
+
+
+
+    // Respond to the client
+    res.json({
+        message: 'Data received successfully',
+        genre,
+        authors
+    });
+});
 app.get('/recommend_books', async (req, res) => {
     const user_input = req.query.query;
     console.log(`User input received: ${user_input}`);  // Print user input
