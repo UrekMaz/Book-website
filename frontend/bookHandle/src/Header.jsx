@@ -80,16 +80,7 @@ export default function Header() {
                 </div>
             </header>
 
-            {recommendedBooks.length > 0 && (
-                <div className='recommendations'>
-                    <h2>Recommended Books:</h2>
-                    <ul>
-                        {recommendedBooks.map((book, index) => (
-                            <li key={index}>{book}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            
         </div>
     );
 }
