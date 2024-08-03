@@ -17,7 +17,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 groq_api_key = os.getenv('GROQ_API_KEY')
 
 
-embeddings = NomicEmbeddings(model="nomic-embed-text-v1.5")
+embeddings = SpacyEmbeddings(model_name="en_core_web_sm")
 
 # Define the tool function
 def extract_text_function(query: str) -> str:
