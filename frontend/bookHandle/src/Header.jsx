@@ -41,7 +41,7 @@ export default function Header() {
 
     return (
         <div>
-            <header className='p-4 flex justify-between items-center bg-dark-brown shadow-md'>
+            <header className='p-4 flex justify-between items-center bg-dark-brown shadow-md z'>
                 <Link to={'/'}>
                     <div className='flex items-center gap-2'>
                         <div className="header-logo">

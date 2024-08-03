@@ -10,8 +10,8 @@
 
 .card {
     border: 1px solid #ddd;
-    height:430px;
-    background-image: url("/border_1.png");
+    height:350px;
+    
     border-radius: 0; /* Remove border-radius for a rectangular shape */
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -21,9 +21,9 @@
 }
 .bord
 {
- padding:10px;   
- height:450px;
-    background-image: url("/border_1.png");
+ padding:2px;   
+ height:360px;
+    background-color: black;
 }
 .card:hover {
     transform: scale(1.05); /* Slightly increase the size on hover */
@@ -83,7 +83,7 @@
 }
 .p-4
 {
-    background-image: url('/books.jpg');
+    background-image: url('/x.jpg');
     background-size: cover; /* Ensure the image covers the entire header */
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Prevent repeating the image */
@@ -126,5 +126,5 @@ header
 }
 .color
 {
-    background-image: url("books.jpg");
+    background-image: url("x.jpg");
 }

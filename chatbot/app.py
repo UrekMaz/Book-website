@@ -10,8 +10,7 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 import os
 from PyPDF2 import PdfReader
 from langchain.agents import tool
-from langchain_community.embeddings import FastEmbedEmbeddings
-
+from langchain_community.embeddings.spacy_embeddings import SpacyEmbeddings
 load_dotenv()
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 

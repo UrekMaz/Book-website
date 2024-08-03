@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import { Link } from 'react-router-dom';
 import Dropdown from '../Component/Dropdown';
-
+import "./s.css"
 const SelectGenre = () => {
   const [genres, setGenres] = useState([]);
   const [authors, setAuthors] = useState([]);
@@ -18,9 +18,11 @@ const SelectGenre = () => {
         if (chosenOption === "Author") {
           const data = await axios.get('/authors');
           setAuthors(data.data);
+          console.log(authors);
         } else {
           const data = await axios.get('/genres');
           setGenres(data.data);
+          console.log(genres);
         }
       } catch (er) {
         console.log(er);
@@ -69,7 +71,7 @@ const SelectGenre = () => {
           headers: {
               'Content-Type': 'application/json'
           }});
-        console.log('Response from server:', response.data);
+        console.log('Response from server: error');
     } catch (error) {
         console.error('Error sending data to the server:', error);
     }
@@ -88,7 +90,7 @@ const SelectGenre = () => {
           onSelect={handleSelect}
         />
       </div>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="w grid grid-cols-4 gap-3">
         {itemsToDisplay.map((item) => (
           <label key={item} className="block p-3 rounded-md bg-gray-300 hover:bg-gray-100 transition-colors">
             <input

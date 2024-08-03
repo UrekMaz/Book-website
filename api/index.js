@@ -11,7 +11,7 @@ const axios = require('axios');
 const session = require('express-session');
 const {list} = require('./genre.js')
 const {Alist} =require('./authors.js')
-
+const qs = require('qs');
 const app = express();
 
 app.use(express.json());
@@ -153,44 +153,34 @@ app.get('/test', (req, res) => {
     res.json("test ok");
 });
 
-app.post("/trends",async (req, res) =>{
-
+app.post("/trends", async (req, res) => {
     const { genre, authors } = req.body;
 
     console.log('Received genre:', genre);
     console.log('Received authors:', authors);
 
-    // Perform operations with genre and authors
-    // For example, save to database or process the data
     try {
-        const response = await axios.get('http://localhost:5001/trends', {
-            params: { genres: genre, authors: authors }
-             }
-        );
+        const response = await axios.get('http://localhost:5000/trends', {
+            params: { genres: genre, authors: authors },
+            paramsSerializer: params => {
+                return qs.stringify(params, { arrayFormat: 'repeat' });
+            }
+        });
         res.json(response.data);
+        console.log(response.data)
     } catch (error) {
         console.error('Error fetching recommendations:', error);
         res.status(500).json({ error: 'Error fetching recommendations' });
     }
 
-
-
-    // Respond to the client
-    res.json({
-        message: 'Data received successfully',
-        genre,
-        authors
-    });
 });
 app.get('/recommend_books', async (req, res) => {
     const user_input = req.query.query;
-    console.log(`User input received: ${user_input}`);  // Print user input
-
+    console.log(user_input)
     try {
         const response = await axios.get('http://localhost:5000/recommend_books', {
             params: { query: user_input }
         });
-        console.log('Received recommendations:', response.data);  // Print recommendations received from Flask
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching recommendations:', error);
@@ -212,4 +202,3 @@ app.post('/logout', (req, res) => {
 app.listen(4000, () => {
     console.log('Server is running on port 4000');
 });
-
