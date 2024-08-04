@@ -41,7 +41,7 @@ export default function Header() {
 
     return (
         <div>
-            <header className='p-4 flex justify-between items-center bg-dark-brown shadow-md z'>
+            <header className='p-4 head flex justify-between items-center bg-dark-brown shadow-md z'>
                 <Link to={'/'}>
                     <div className='flex items-center gap-2'>
                         <div className="header-logo">
@@ -95,9 +95,9 @@ export default function Header() {
             </header>
 
             {recommendedBooks.length > 0 && (
-                <div className='container mt-4'>
+                <div className='container mt-4 '>
                     <h2></h2>
-                    <div className='row'>
+                    <div className='row '>
                         {recommendedBooks.map((book, index) => (
                             <div 
                                 key={index} 

@@ -28,8 +28,11 @@ function App() {
                    // console.log('No user data found in response.');
                 }
             } catch (err) {
-                console.error('Error fetching profile:', err);
+              console.error('Error fetching profile:', err.message);
+              console.error('Error config:', err.config);
+              console.error('Error response:', err.response);
             }
+            
         };
 
         checkLoggedIn();

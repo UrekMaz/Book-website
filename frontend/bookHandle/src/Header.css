@@ -81,7 +81,11 @@
 .rectangle {
     border-radius: 0;
 }
-.p-4
+body
+{
+    background-image: url('/x.jpg'); 
+}
+.head
 {
     background-image: url('/x.jpg');
     background-size: cover; /* Ensure the image covers the entire header */
