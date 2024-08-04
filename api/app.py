@@ -110,7 +110,6 @@ def create_features(df, selected_genres=None, selected_authors=None):
 
     # Remove duplicates if both genres and authors are selected
     features = features.drop_duplicates(subset=['id'])
-    # print(features.columns)
     print(features)
     print("in createf")
 
@@ -119,11 +118,7 @@ def create_features(df, selected_genres=None, selected_authors=None):
     else:
         raise KeyError("The 'average_rating' column does not exist in the DataFrame.")
 
-    return sorted_df
-    # return features
-
-
-# res = prepare_data(df, selected_genres=['Science Fiction', 'Fiction'])
+    return sorted_df.head(15)
 
 @app.route('/trends', methods=['GET'])
 def get_books():
@@ -131,12 +126,17 @@ def get_books():
         genres = request.args.getlist('genres')
         authors = request.args.getlist('authors')
         print("Received genres:", genres)
-        print(request)
         print("Received authors:", authors)
-        print("in")
-        sorted_books = prepare_data(books, genres, authors)
-        print(sorted_books)
-        return jsonify(sorted_books.to_dict(orient='records'))
+        
+        # Convert books list to DataFrame
+        books_df = pd.DataFrame(books)
+        
+        sorted_books = prepare_data(books_df, genres, authors)
+        
+        # Return only the top 10 books
+        top_books = sorted_books[['title','image_url','authors','previewLink']].head(10)
+        
+        return jsonify(top_books.to_dict(orient='records'))
     except Exception as e:
         print("Error processing request:", e)
         return jsonify({"error": str(e)}), 500

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import "./dd.css"
 const Dropdown = ({ options, placeholder, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(placeholder);
@@ -13,11 +13,11 @@ const Dropdown = ({ options, placeholder, onSelect }) => {
   };
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative dd inline-block text-left">
       <button
         type="button"
         onClick={handleToggle}
-        className="bg-blue-400 text-white  w-60 h-10 rounded-lg focus:outline-none"
+        className="text-white style_it w-60 h-10 rounded-lg focus:outline-none"
       >
         {selectedOption}
         <svg
