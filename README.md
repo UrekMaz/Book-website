@@ -2,7 +2,10 @@
 
 **Bibliotheca** is a beautifully designed book discovery platform that helps users explore, preview, and interact with a curated library of books. Built with modern web technologies, it offers a seamless and engaging reading experience.
 
-![preview](https://drive.google.com/drive/folders/1gVxkVOsT_7OR6hTuCNKDFyLudrxIKOU4)
+## 🎥 Demo
+
+[📽️ Watch the demo video on Google Drive](https://drive.google.com/drive/folders/1gVxkVOsT_7OR6hTuCNKDFyLudrxIKOU4?usp=sharing)
+
 
 ---
 
