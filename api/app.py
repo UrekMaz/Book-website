@@ -7,9 +7,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from fuzzywuzzy import process
 from concurrent.futures import ThreadPoolExecutor
+from flask_cors import CORS
+
 
 app = Flask(__name__)
-
+CORS(app, origins=["http://localhost:5173"])
 # Load your dataset
 books = pd.read_csv('merged.csv')
 
@@ -96,28 +98,52 @@ def recommend_books():
     return jsonify(recommendations[['book_id', 'title', 'authors', 'categories', 'description', 'similarity','image_url','previewLink']].head(20).to_dict(orient='records'))
 
 def create_features(df, selected_genres=None, selected_authors=None):
-    features = pd.DataFrame()
-
-    if selected_genres:
-        genre_mask = df['categories'].apply(lambda x: any(genre in x for genre in selected_genres))
-        genre_features = df[genre_mask]
-        features = pd.concat([features, genre_features])
-
-    if selected_authors:
-        author_mask = df['authors'].apply(lambda x: any(author in x for author in selected_authors))
-        author_features = df[author_mask]
-        features = pd.concat([features, author_features])
-
-    # Remove duplicates if both genres and authors are selected
-    features = features.drop_duplicates(subset=['id'])
-    print(features)
-    print("in createf")
-
-    if 'average_rating' in features.columns:
-        sorted_df = features.sort_values(by='average_rating', ascending=False)
+    # Validate input dataframe contains required columns
+    print("DataFrame columns:", df.columns.tolist())
+    
+    # Create an empty DataFrame with proper structure if there are no matches
+    if (selected_genres or selected_authors) and df.empty:
+        return pd.DataFrame(columns=['title', 'authors', 'categories', 'image_url', 'previewLink', 'average_rating'])
+    
+    # Start with full dataset if no filters provided
+    if not selected_genres and not selected_authors:
+        features = df.copy()
     else:
-        raise KeyError("The 'average_rating' column does not exist in the DataFrame.")
+        features = pd.DataFrame()
+        
+        if selected_genres:
+            # Handle case sensitivity and partial matches
+            genre_mask = df['categories'].str.lower().apply(
+                lambda x: any(genre.lower() in x for genre in selected_genres) if isinstance(x, str) else False
+            )
+            genre_features = df[genre_mask]
+            features = pd.concat([features, genre_features])
 
+        if selected_authors:
+            # Handle case sensitivity and partial matches
+            author_mask = df['authors'].str.lower().apply(
+                lambda x: any(author.lower() in x for author in selected_authors) if isinstance(x, str) else False
+            )
+            author_features = df[author_mask]
+            features = pd.concat([features, author_features])
+
+        # Remove duplicates if both genres and authors are selected
+        features = features.drop_duplicates()
+    
+    print(f"Features shape after filtering: {features.shape}")
+    
+    # Check if average_rating exists and is numeric
+    if 'average_rating' not in features.columns:
+        print("Warning: 'average_rating' column not found. Using default sorting.")
+        # Add a dummy rating if not available
+        features['average_rating'] = 0
+    else:
+        # Ensure average_rating is numeric
+        features['average_rating'] = pd.to_numeric(features['average_rating'], errors='coerce').fillna(0)
+    
+    # Sort by average_rating
+    sorted_df = features.sort_values(by='average_rating', ascending=False)
+    
     return sorted_df.head(15)
 
 @app.route('/trends', methods=['GET'])
@@ -128,30 +154,55 @@ def get_books():
         print("Received genres:", genres)
         print("Received authors:", authors)
         
-        # Convert books list to DataFrame
-        books_df = pd.DataFrame(books)
+        # Ensure we're working with a copy of the dataframe
+        books_df = books.copy()
         
-        sorted_books = prepare_data(books_df, genres, authors)
+        # Debug columns
+        print("Books DataFrame columns:", books_df.columns.tolist())
         
-        # Return only the top 10 books
-        top_books = sorted_books[['title','image_url','authors','previewLink']].head(10)
+        # If no filters, return trending books (top rated with some filters for quality)
+        if not genres and not authors:
+            # Make sure average_rating is properly handled
+            books_df['average_rating'] = pd.to_numeric(books_df['average_rating'], errors='coerce').fillna(0)
+            
+            # Filter for quality trending books:
+            # 1. Minimum rating threshold
+            # 2. Only include books with valid image_url and previewLink
+            trending_df = books_df[
+                (books_df['average_rating'] >= 4.0) & 
+                (books_df['image_url'].notna() & books_df['image_url'].str.len() > 5) &
+                (books_df['previewLink'].notna() & books_df['previewLink'].str.len() > 5)
+            ]
+            
+            # Sort by average_rating and get top books
+            result_books = trending_df.sort_values(by='average_rating', ascending=False).head(50)
+
+            # Fallback in case fewer than 50
+            if len(result_books) < 50:
+                result_books = books_df.sort_values(by='average_rating', ascending=False).head(50)
+            
+            print(f"Found {len(result_books)} trending books")
+        else:
+            # If genres or authors specified, use the filtering function
+            result_books = create_features(books_df, genres, authors)
         
-        return jsonify(top_books.to_dict(orient='records'))
+        # Ensure required columns exist in output
+        required_columns = ['title', 'authors', 'image_url', 'previewLink']
+        for col in required_columns:
+            if col not in result_books.columns:
+                result_books[col] = f"No {col} available"
+        
+        # Return only the requested columns for the top books
+        output_data = result_books[required_columns].head(50).to_dict(orient='records')
+        
+        print(f"Returning {len(output_data)} books")
+        return jsonify(output_data)
+    
     except Exception as e:
         print("Error processing request:", e)
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
-
-def prepare_data(books, selected_genres=None, selected_authors=None):
-    # Implement your data preparation logic here
-    features = create_features(books, selected_genres, selected_authors)
-    print(features)
-    print("in predata")
-    return features
-
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

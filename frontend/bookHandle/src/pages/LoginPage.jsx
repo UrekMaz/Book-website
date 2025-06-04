@@ -14,21 +14,19 @@ export default function LoginPage(){
         try{
             const {data} = await axios.post('/login', { email, pwd });
             setUser(data);
-            console.log(data)
+            console.log(data);
             
-        if (data.email ===email) {
+            
+            
+        if (data.email ===email ) {
             alert("login successful");
             setRedirect(true);
             // Token is stored in a cookie, no need to store it in localStorage
-        } 
-        // else if (response.data === "pass not ok") {
-        //     alert("login unsuccessful");
-        // } else if (response.data === "Not found") {
-        //     alert("user not found");
-        // }
-            
-
-            
+        }
+        else{
+            alert(data)
+        }  
+                
         }catch(er){
             console.log(er);
             alert("login Unsuccessful")
