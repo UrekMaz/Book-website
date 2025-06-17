@@ -83,11 +83,9 @@
 }
 body
 {
-    background-image: url('/x.jpg'); 
 }
 .head
 {
-    background-image: url('/x.jpg');
     background-size: cover; /* Ensure the image covers the entire header */
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Prevent repeating the image */
@@ -127,8 +125,4 @@ header
 .c
 {
     font-size: 20px;
-}
-.color
-{
-    background-image: url("x.jpg");
 }

@@ -3,7 +3,12 @@ langchain
 PyPDF2
 python-dotenv
 langchain_groq
-langchain_groq
 langchain_community
 langserve
 langchain_core
+pandas
+scikit-learn
+fuzzywuzzy
+numpy
+flask
+

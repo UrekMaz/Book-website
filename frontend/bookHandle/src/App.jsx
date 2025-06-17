@@ -9,6 +9,11 @@ import Register from './pages/Register.jsx';
 import Chatbot from './Chatbot.jsx';
 import SelectGenre from './pages/selectGenre.jsx'
 import IndexPage from './pages/IndexPage.jsx'
+import SearchResults from './pages/SearchResults.jsx';
+import ProfilePage from "./pages/ProfilePage.jsx";
+import React from 'react';
+
+// import BookRecommendation from "./pages/BookRec.jsx";
 
 axios.defaults.baseURL = 'http://localhost:4000';
 axios.defaults.withCredentials = true;
@@ -43,15 +48,18 @@ function App() {
         <Routes>
             <Route path='/' element={<Layout />}>
           <Route index element={<IndexPage />} />
+          {/* <Route path="/recommendations" element={<BookRecommendation />} /> */}
           <Route path='index' element={<IndexPage />} />
           <Route path='upload' element={<UploadPage />} />
+          <Route path="search-results" element={<SearchResults />} />
           <Route path='login' element={<LoginPage />} />
           <Route path='register' element={<Register />} />
           <Route path='chatbot' element={<Chatbot />} />
           <Route path='genre' element={<SelectGenre />} />
-        </Route>
-            
+          <Route path='profile' element={<ProfilePage />} />
 
+          
+        </Route>
         </Routes>
     );
 }

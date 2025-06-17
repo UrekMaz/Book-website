@@ -14,6 +14,7 @@ const {Alist} =require('./authors.js')
 const qs = require('qs');
 const app = express();
 
+
 app.use(express.json());
 app.use(cookieparser());
 app.use(cors({
@@ -28,7 +29,7 @@ app.use(session({
     cookie: { secure: false, httpOnly: true, sameSite: 'lax' } // Adjust as needed
 }));
 
-mongoose.connect('mongodb+srv://manual:nrtGC7D6tG2GjS1E@cluster0.60idrdx.mongodb.net/newTest?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('mongodb+srv://maureenmiranda22:RKBT03LAh9HprHpd@cluster0.ive9g.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => {
         console.log('Connected to MongoDB');
     })
@@ -52,11 +53,11 @@ const bsalt = bcrypt.genSaltSync(10);
 
 app.post('/uploadBook', upload.single('material'), async (req, res) => {
     res.setHeader("Access-Control-Allow-Credentials", true);
-    const { title, isbn, rating } = req.body;
+    const { title, isbn, rating, genre, author, des } = req.body;
     const material = req.file.filename;
     try {
         const newBook = await NewBook.create({
-            title, isbn, rating, material
+            title, isbn, rating, material,genre,author,des
         });
         res.json(newBook);
     } catch (er) {
@@ -153,28 +154,31 @@ app.get('/test', (req, res) => {
     res.json("test ok");
 });
 
+// In index.js
 app.post("/trends", async (req, res) => {
-    const { genre, authors } = req.body;
-
-    console.log('Received genre:', genre);
-    console.log('Received authors:', authors);
-
+    // Extract genres and authors from request body with consistent naming
+    const { genres, authors } = req.body;
+    
     try {
         const response = await axios.get('http://localhost:5000/trends', {
-            params: { genres: genre, authors: authors },
+            params: { 
+                genres: genres || [], 
+                authors: authors || [] 
+            },
             paramsSerializer: params => {
                 return qs.stringify(params, { arrayFormat: 'repeat' });
             }
         });
         res.json(response.data);
-        console.log(response.data)
+        console.log("Received trending books:", response.data.length);
     } catch (error) {
         console.error('Error fetching recommendations:', error);
         res.status(500).json({ error: 'Error fetching recommendations' });
     }
-
 });
+
 app.get('/recommend_books', async (req, res) => {
+    console.log("Query received:", req.query);
     const user_input = req.query.query;
     console.log(user_input)
     try {
