@@ -5,11 +5,13 @@
 ## 🎥 Demo
 
 [📽️ Watch the demo video on Google Drive](https://drive.google.com/drive/folders/1gVxkVOsT_7OR6hTuCNKDFyLudrxIKOU4?usp=sharing)
+![image](https://github.com/user-attachments/assets/6a1cf7d2-b437-4631-8035-deec837c3ebd)
+
 
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
 - 🔍 **Smart Book Search**  
   Search books by title, author, or keyword using a dynamic and responsive search bar with instant results.
