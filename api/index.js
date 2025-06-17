@@ -1,34 +1,3 @@
-// const express = require('express');
-// const cors = require('cors');
-// const mongoose = require("mongoose");
-// const User = require("./UserSchema.js");
-// const NewBook = require("./NewBook.js");
-// const cookieparser = require('cookie-parser');
-// const bcrypt = require("bcryptjs");
-// const multer = require('multer');
-// const jwt = require('jsonwebtoken');
-// const axios = require('axios');
-// const session = require('express-session');
-// const {list} = require('./genre.js')
-// const {Alist} =require('./authors.js')
-// const qs = require('qs');
-// const app = express();
-
-// app.use(express.json());
-// app.use(cookieparser());
-// app.use(cors({
-//     credentials: true,
-//     origin: 'http://localhost:5173',
-// }));
-
-// app.use(session({
-//     secret: 'your_secret_key',
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: { secure: false, httpOnly: true, sameSite: 'lax' } // Adjust as needed
-// }));
-
-// mongoose.connect('mongodb+srv://maureenmiranda22:fiwUtIwlfpmpijGv@cluster0.ive9g.mongodb.net/myBook?retryWrites=true&w=majority&appName=Cluster0')
 const express = require('express');
 const cors = require('cors');
 const mongoose = require("mongoose");
@@ -45,6 +14,7 @@ const {Alist} =require('./authors.js')
 const qs = require('qs');
 const app = express();
 
+
 app.use(express.json());
 app.use(cookieparser());
 app.use(cors({
@@ -59,7 +29,7 @@ app.use(session({
     cookie: { secure: false, httpOnly: true, sameSite: 'lax' } // Adjust as needed
 }));
 
-mongoose.connect('mongodb+srv://maureenmiranda22:fiwUtIwlfpmpijGv@cluster0.ive9g.mongodb.net/myBook?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('mongodb+srv://maureenmiranda22:RKBT03LAh9HprHpd@cluster0.ive9g.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => {
         console.log('Connected to MongoDB');
     })

@@ -11,6 +11,8 @@ import SelectGenre from './pages/selectGenre.jsx'
 import IndexPage from './pages/IndexPage.jsx'
 import SearchResults from './pages/SearchResults.jsx';
 import ProfilePage from "./pages/ProfilePage.jsx";
+import React from 'react';
+
 // import BookRecommendation from "./pages/BookRec.jsx";
 
 axios.defaults.baseURL = 'http://localhost:4000';
